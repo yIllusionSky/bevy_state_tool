@@ -2,7 +2,9 @@
 name = "bevy_state_tool"
 version = "0.1.0"
 edition = "2021"
-
+authors =["IllusionAutumn d161442079@163.com"]
+description = "A small package to simplify bevy writing"
+license = "MIT OR Apache-2.0"
 include = [
     "**/*.rs",
     "Cargo.toml",
