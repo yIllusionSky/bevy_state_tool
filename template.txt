@@ -1,0 +1,39 @@
+use bevy::prelude::*;
+use iyes_loopless::prelude::*;
+use super::$;
+
+pub(in super) struct ~;
+
+
+impl Plugin for ~{
+    fn build(&self, app: &mut App) {
+        /* 默认实现的代码 */
+        app.add_startup_system(Self::ready).add_enter_system($::~,Self::enter)
+        .add_system(Self::update.run_in_state($::~))
+        .add_exit_system($::~,Self::exit);
+        
+        /* 自己实现的代码 */
+    }
+}
+
+impl ~{
+    /* 程序运行的时候执行一次 */
+    fn ready(){
+        
+    }
+
+    /* 每次进入该状态时执行一次 */
+    fn enter(){
+
+    }
+
+    /* 在该状态时每帧执行一次 */
+    fn update(){
+
+    }
+
+    /* 每次退出该状态时执行一次 */
+    fn exit(){
+        
+    }
+}
