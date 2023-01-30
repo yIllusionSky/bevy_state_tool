@@ -40,12 +40,16 @@ use std::io::{Read, Write};
 use proc_macro::TokenStream;
 use syn::parse_macro_input;
 use syn::DeriveInput;
+mod to_snake_case;
+use to_snake_case::ToSnakeCase;
 /** 该过程宏会自动根据枚举生成对印结构体 */
 #[proc_macro_derive(GameStates)]
 pub fn game_states(input: proc_macro::TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     let enum_name: &str = &input.ident.to_string();
-    let path_name: &str = &enum_name.to_ascii_lowercase();
+    
+    //把大驼峰命名法的字符串转换成蛇形命名法的字符串
+    let path_name: &str=&ToSnakeCase::new(enum_name).collect::<String>();
     //如果没有这个文件夹
     if !std::fs::try_exists(String::from("src/") + path_name).unwrap() {
         /* 创建目录以及子文件夹 */
@@ -79,13 +83,14 @@ pub fn game_states(input: proc_macro::TokenStream) -> TokenStream {
                 for variant in &data_struct.variants {
                     //结构体名字
                     let variant_name: &str = &variant.ident.to_string();
-                    let struct_file_name: &str = &variant_name.to_ascii_lowercase();
+                    //把大驼峰命名法的字符串转换成蛇形命名法的字符串
+                    let struct_file_name: &str=&ToSnakeCase::new(variant_name).collect::<String>();
                     //加载记录
                     writeln!(file, "{}", variant_name).unwrap();
                     writeln!(init_file, ".add_plugin({})", variant_name).unwrap();
                     writeln!(mod_rs_file, "mod {};", struct_file_name).unwrap();
                     writeln!(mod_rs_file, "use {}::{};", struct_file_name, variant_name).unwrap();
-                    create_file(enum_name, variant_name).unwrap();
+                    create_file(path_name,struct_file_name,enum_name, variant_name).unwrap();
                 }
             }
             _ => (),
@@ -134,7 +139,7 @@ pub fn game_states(input: proc_macro::TokenStream) -> TokenStream {
                         writeln!(init_file, ".add_plugin({})", variant_name).unwrap();
                         writeln!(mod_rs_file, "mod {};", struct_file_name).unwrap();
                         writeln!(mod_rs_file, "use {}::{};", struct_file_name, variant_name).unwrap();
-                        create_file(enum_name, variant_name).unwrap();
+                        create_file(path_name,struct_file_name,enum_name, variant_name).unwrap();
                     }
                 }
             }
@@ -150,16 +155,16 @@ pub fn game_states(input: proc_macro::TokenStream) -> TokenStream {
 
 //创建文件
 #[inline]
-fn create_file(path: &str, file_name: &str) -> std::io::Result<()> {
+fn create_file(path: &str, file_name: &str,enum_name:&str,struct_name:&str) -> std::io::Result<()> {
     let mut struct_file = std::fs::File::create(
         String::from("src/")
-            + &path.to_ascii_lowercase()
+            + &path
             + "/"
-            + &file_name.to_ascii_lowercase()
+            + &file_name
             + ".rs",
     )?;
     let over_str = include_str!("../template.txt")
-        .replace("$", path)
-        .replace("~", file_name);
+        .replace("$", enum_name)
+        .replace("~", struct_name);
     write!(struct_file, "{}", over_str)
 }
